@@ -17,10 +17,11 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
+          cache-dependency-path: website/package-lock.json
           node-version: 18
           cache: npm
 
       - name: Install dependencies
         run: cd website && npm ci
       - name: Test build website
-        run: npm build
+        run: cd website && npm run build
