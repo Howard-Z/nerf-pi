@@ -35,14 +35,26 @@ def initialize_landmarker_with_image(image_path: str):
             landmarks.append((pixel_x, pixel_y, landmark.z, landmark.visibility))
     return landmarks
 
-def calculate_depth(K_L, K_R, point_L, point_R, dist_between_cams):
+def calculate_depth(K, point_L, point_R, dist_between_cams):
     x_disparity = point_L[0] - point_R[0]
-    f_xL = K_L[0, 0]
-    f_xR = K_R[0, 0]
+    f_x = K[0, 0]
 
-    depth = (f_xL * dist_between_cams) / x_disparity
-    return depth
+    depth = (f_x * dist_between_cams) / x_disparity
+    return abs(depth)      # positive is in front of the cameras.
 
+def calculate_world(K_L, K_R, point_L, point_R, dist_between_cams):
+    _ZL = calculate_depth(K_L, point_L, point_R, dist_between_cams)
+    _XL = _ZL * (point_L[0] - K_L[0, 2]) / K_L[0, 0] - (dist_between_cams / 2)
+    _YL = _ZL * (point_L[1] - K_L[1, 2]) / K_L[1, 1]
+
+    _ZR = calculate_depth(K_R, point_L, point_R, dist_between_cams)
+    _XR = _ZR * (point_R[0] - K_R[0, 2]) / K_R[0, 0] - (dist_between_cams / 2)
+    _YR = _ZR * (point_R[1] - K_R[1, 2]) / K_R[1, 1]
+
+    print(_XL, _YL, _ZL)
+    print(_XR, _YR, _ZR)
+
+    return [(_XL + _XR) / 2, (_YL + _YR) / 2, (_ZL + _ZR) / 2]
 
 if __name__ == '__main__':
     left_points = initialize_landmarker_with_image(r"C:\Users\adnja\Pictures\Camera Roll\left.jpg")
@@ -57,8 +69,13 @@ if __name__ == '__main__':
 
     print(K_L, K_R)
 
-    d = calculate_depth(K_L, K_R, left_points[17], right_points[17], 3.90)
-    print(d)
+    distances = []
+
+    for i in range(len(left_points)):
+        distances.append(calculate_world(K_L, K_R, left_points[i], right_points[i], 3.90))
+
+    print(distances)
+
 
 
     # stereo rectification
