@@ -1,16 +1,14 @@
 import cv2
 import numpy as np
 import glob
+from constants import CHECKERBOARD, SQUARE_SIZE, CALIBRATION_PATH_RIGHT, CALIBRATION_PATH_LEFT
+
 
 def calibrate(path):
-    # Checkerboard pattern dimensions
-    CHECKERBOARD = (9, 6)  # number of internal corners
-    square_size = 1.0  # 1 inch irl
-
     # Prepare object points
     objp = np.zeros((CHECKERBOARD[0]*CHECKERBOARD[1], 3), np.float32)
     objp[:, :2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
-    objp *= square_size
+    objp *= SQUARE_SIZE
 
     objpoints = []  # 3d points
     imgpoints = []  # 2d image points
@@ -31,16 +29,29 @@ def calibrate(path):
 
     return ret, K, dist, rvecs, tvecs, objpoints, imgpoints
 
-def get_intrinsic_components(K):
-    # K is the intrinsic matrix
-    fx = K[0, 0]
-    fy = K[1, 1]
-    cx = K[0, 2]
-    cy = K[1, 2]
-    return fx, fy, cx, cy
+if __name__ == '__main__':
+    # run this file to calibrate cameras with images in the provided filepath, and
+    # regenerate the calibration.npy file.
+    calibration_path_right = CALIBRATION_PATH_RIGHT
+    calibration_path_left = CALIBRATION_PATH_LEFT
 
-def get_field_of_view(fx, fy):
-    fov_x = 2 * np.arctan(1920 / (2 * fx)) * 180 / np.pi
-    fov_y = 2 * np.arctan(1080 / (2 * fy)) * 180 / np.pi
+    ret_L, K_L, dist_L, rvecs_L, tvecs_L, objpoints_L, imgpoints_L = calibrate(calibration_path_left)
+    ret_R, K_R, dist_R, rvecs_R, tvecs_R, objpoints_R, imgpoints_R = calibrate(calibration_path_right)
 
-    return fov_x, fov_y
+    d = {"ret_L": ret_L,
+         "K_L": K_L,
+         "dist_L": dist_L,
+         "rvecs_L": rvecs_L,
+         "tvecs_L": tvecs_L,
+         "objpoints_L": objpoints_L,
+         "imgpoints_L": imgpoints_L,
+         "ret_R": ret_R,
+         "K_R": K_R,
+         "dist_R": dist_R,
+         "rvecs_R": rvecs_R,
+         "tvecs_R": tvecs_R,
+         "objpoints_R": objpoints_R,
+         "imgpoints_R": imgpoints_R}
+
+    np.save("calibration.npy", d)
+    print("Camera calibration matrices saved to file.")

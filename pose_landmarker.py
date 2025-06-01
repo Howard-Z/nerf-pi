@@ -6,11 +6,7 @@ from mediapipe.tasks.python.vision.core.vision_task_running_mode import VisionTa
 
 import threading
 from collections import defaultdict
-
-# Constants
-MODEL_PATH = "pose_landmarker_lite.task"  # Update if needed
-IMAGE_HEIGHT = 1080
-IMAGE_WIDTH = 1920
+from constants import MODEL_PATH, IMAGE_WIDTH, IMAGE_HEIGHT
 
 shared_data = defaultdict(lambda: None)
 data_lock = threading.Lock()
@@ -62,6 +58,7 @@ def initialize_landmarker(cam_number: int=0, show_window: bool=False):
 
     # Start webcam capture
     cap = cv2.VideoCapture(cam_number)
+
 
     try:
         while cap.isOpened():
