@@ -4,7 +4,8 @@ IMAGE_HEIGHT = 1080
 IMAGE_WIDTH = 1920
 
 # used for binocular vision calculations (binocular.py)
-CAMERA_DIST = 3.90  # distance between the two cameras, in inches
+CAMERA_DIST = 3.91  # distance between the two cameras, in inches
+FUDGE = lambda z: 1.265 + 0.0008 * z  # function to multiply to change camera depth estimate
 
 # used for camera calibration (camera_calibration.py)
 CHECKERBOARD = (9, 6)  # number of internal corners

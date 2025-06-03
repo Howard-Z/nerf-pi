@@ -1,9 +1,10 @@
 from pose_landmarker import initialize_landmarker, data_lock, shared_data
-from constants import CAMERA_DIST
-from numpy import load
+from constants import CAMERA_DIST, FUDGE
+from numpy import load, array
 import threading
 import time
 
+# https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker
 
 def start_cameras():
     thread1 = threading.Thread(target=initialize_landmarker, args=(0, True))
@@ -12,12 +13,14 @@ def start_cameras():
     thread1.start()
     thread2.start()
 
+
 def calculate_depth(K, point_L, point_R, dist_between_cams):
     x_disparity = point_L[0] - point_R[0]
     f_x = K[0, 0]
 
     depth = (f_x * dist_between_cams) / x_disparity
-    return abs(depth)      # positive is in front of the cameras.
+    return abs(depth) * FUDGE(abs(depth))     # positive is in front of the cameras.
+
 
 def calculate_world(K_L, K_R, point_L, point_R, dist_between_cams):
     _ZL = calculate_depth(K_L, point_L, point_R, dist_between_cams)
@@ -32,6 +35,7 @@ def calculate_world(K_L, K_R, point_L, point_R, dist_between_cams):
     # print(_XR, _YR, _ZR)
 
     return [(_XL + _XR) / 2, (_YL + _YR) / 2, (_ZL + _ZR) / 2]
+
 
 if __name__ == '__main__':
     # load camera calibration file.  (Generated with camera_calibration.py)
@@ -50,6 +54,10 @@ if __name__ == '__main__':
             right = shared_data[1]
 
         if left and right and left[1] and right[1]:
+            # append the point that represents the center of the chest
+            left[1].append(array([left[1][11], left[1][12], left[1][23], left[1][24]]).mean(axis=0))
+            right[1].append(array([right[1][11], right[1][12], right[1][23], right[1][24]]).mean(axis=0))
+            
             points = list(map(calculate_world_curry, left[1], right[1]))
             started = True
         else:
