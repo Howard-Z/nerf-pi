@@ -42,7 +42,7 @@ def make_callback(cam_number):
     return callback
 
 
-def initialize_landmarker(cam_number: int=0, show_window: bool=False):
+def initialize_landmarker(cam_number: int=0, show_window: bool=False, shutdown_event: threading.Event = None):
     # Set up landmarker options
     base_options = python.BaseOptions(model_asset_path=MODEL_PATH)
     options = vision.PoseLandmarkerOptions(
@@ -61,7 +61,7 @@ def initialize_landmarker(cam_number: int=0, show_window: bool=False):
 
 
     try:
-        while cap.isOpened():
+        while cap.isOpened() and (shutdown_event is None or not shutdown_event.is_set()):
             success, frame = cap.read()
             if not success:
                 print("Ignoring empty frame.")
