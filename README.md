@@ -1,7 +1,7 @@
 # nerf-pi
 UCLA Com Sci 188 - Introduction to Robotics, final project.
 
-Our goal is to build a nerf "turret", consisting of a nerf gun on top of a rotating base and two cameras.  Binocular vision is implemented for the cameras to perceive depth and calculate rotation angles.  Two stepper motors are used to move the turret to the desired location, and shoot.
+Our goal is to build a nerf "turret", consisting of a nerf gun on top of a rotating base and two cameras.  Binocular vision is implemented for the cameras to perceive depth and calculate rotation angles.  Two stepper motors are used to move the turret to the desired location, and shoot with a servo motor.
 
 ### Hardware
 Hardware used in this include:
@@ -10,6 +10,7 @@ Hardware used in this include:
 2. 28BYJ-48 stepper motor
     - ULN2003 driver board
 3. SG90 servo motor
+4. Nerf gun
 
 The pins for each of the hardware components are defined inside of `turret.py`
 
