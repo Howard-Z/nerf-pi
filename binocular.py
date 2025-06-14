@@ -2,7 +2,7 @@ import signal
 import sys
 
 from pose_landmarker import initialize_landmarker, data_lock, shared_data
-from constants import CAMERA_DIST, FUDGE
+from constants import CAMERA_DIST, FUDGE, MAX_CHANGE, POI_INDEX
 from numpy import load, array
 import threading
 import time
@@ -98,6 +98,7 @@ if __name__ == '__main__':
     started = False
     try:
         camera_threads = start_cameras()
+        current = None
         while True:
             if shutdown_event.is_set():
                 break
@@ -126,17 +127,27 @@ if __name__ == '__main__':
             # for n, i in enumerate(points):
             #     print(f"{n}: ({i[0]}, {i[1]}, {i[2]})")
             
-            result = mqttc.publish(TOPIC_MESSAGES[0], points[33][0])
-            result = mqttc.publish(TOPIC_MESSAGES[1], points[33][1])
-            result = mqttc.publish(TOPIC_MESSAGES[2], points[33][2])
+            if not current:
+                current = points[POI_INDEX]
+            
+            for i in range(3):
+                current[i] = points[POI_INDEX][i] if abs(current[i] - points[POI_INDEX][i]) < MAX_CHANGE else \
+                            current[i] - MAX_CHANGE if points[POI_INDEX][i] < current[i] else \
+                            current[i] + MAX_CHANGE
 
-            theta = math.atan(points[33][0]/points[33][2])
-            phi = math.atan(points[33][1]/points[33][2])
+            print(current)
+
+            result = mqttc.publish(TOPIC_MESSAGES[0], current[0])
+            result = mqttc.publish(TOPIC_MESSAGES[1], current[1])
+            result = mqttc.publish(TOPIC_MESSAGES[2], current[2])
+
+            theta = math.atan(current[0]/current[2])
+            phi = math.atan(current[1]/current[2])
 
             result = mqttc.publish(TOPIC_MESSAGES[3], theta * 180 / math.pi)
             result = mqttc.publish(TOPIC_MESSAGES[4], phi * 180 / math.pi)
             
-            time.sleep(1)
+            time.sleep(.2)
 
     except KeyboardInterrupt:
         shutdown_event.set()
