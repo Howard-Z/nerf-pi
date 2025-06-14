@@ -40,7 +40,7 @@ To calibrate the two cameras, print out the checkerboard in `camera_calibration_
 * It is recommended to mount the checkerboard on a rigid surface (e.g., a picture frame, or cardboard) to ensure it is flat.
 * Make sure the checkerboard is clearly and completely visible in each picture; not obscured, dark, washed out, or covered by shadows.  Smooth lighting is recommended.
 
-Click [https://howard-z.github.io/nerf-pi/docs/cameras](here) for the implementation.
+Click [here](/docs/cameras) for the implementation.
 
 ### MQTT
 The camera sends information to our turret platform using MQTT. We specify an MQTT broker within our 2 python files that allow data to be sent to the turret.
